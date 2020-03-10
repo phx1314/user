@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.user.dao.OaUserMapper">
+    <resultMap id="BaseResultMap" type="com.example.user.model.OaUser">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="job_number" jdbcType="VARCHAR" property="jobNumber"/>
+        <result column="department" jdbcType="VARCHAR" property="department"/>
+        <result column="oa_ids" jdbcType="CHAR" property="oaIds"/>
+        <result column="other_oa" jdbcType="VARCHAR" property="otherOa"/>
+    </resultMap>
+
+    <select id="selectByJobNumber" resultType="com.example.user.model.OaUser">
+		select * from oa_user where job_number = #{jobNumber}
+	</select>
+    <select id="selectByOaIds" resultType="com.example.user.model.OaUser">
+		select * from oa_user where FIND_IN_SET(#{oaIds} ,oa_ids)
+	</select>
+</mapper>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<!--suppress ALL-->
+<html xmlns:th="http://www.thymeleaf.org" lang="zh">
+<head> 
+    <meta charset="utf-8">
+    <title>常用办公软件需求表</title> 
+</head>
+<body>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<!--使用Bootstrap的js插件，必须先调入jQuery-->
+<script src="http://libs.baidu.com/jquery/1.9.0/jquery.min.js"></script>
+<!-- 包括所有bootstrap的js插件或者可以根据需要使用的js插件调用　-->
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<!--<script th:src="@{/layui/lay/modules/layer.js}"></script>-->
+<script src="layui/lay/modules/layer.js"></script>
+<!--<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>-->
+<div class="container" style="background-image: url(bg.jpg)">
+    <img src="dream-seeker@2x.jpg" style="width: 100%;height: 100px"/>
+    <div style="font-size:30px;color:darkblue; display: flex;justify-content: center;margin-top: 15px"> 常用办公软件需求表</div>
+    <div id="container" style="width:100%; display: flex;justify-content: center;margin-top: 20px">
+        <div style="font-size:20px;font-weight: bold;"> 1.</div>
+        <div style="width: 100%; ">
+            <div>
+                <div style="font-size:20px;font-weight: bold;">姓名:</div>
+                <input id="input-name">
+            </div>
+            <div style="margin-top: 10px">
+                <div style="font-size:20px;font-weight: bold;">工号:</div>
+                <input id="input-gh">
+            </div>
+            <div style="margin-top: 10px">
+                <div style="font-size:20px;font-weight: bold;">部门:</div>
+                <input id="input-bm">
+            </div>
+            <div style="margin-top: 10px">例:</div>
+            <div>姓名:张三</div>
+            <div>工号:003</div>
+            <div>部门:行政管理部</div>
+            <hr width="100%"/>
+        </div>
+
+    </div>
+    <div style="width:100%; display: flex;justify-content: center;margin-top: 20px">
+        <div style="font-size:20px;font-weight: bold;"> 2.</div>
+        <div style="width: 100%; ">
+            <div style="font-size:20px;font-weight: bold;">选择常用软件 【多选题】</div>
+            <div style="font-size:20px; ">请在下述列表中选择你常用的办公软件。</div>
+            <form action="" method="get" style="width:100%; ">
+                <div style="text-align: left; margin-right: 10px;" th:each="e:${emps}"><input name="checks" type="checkbox" th:text="${e.getName()}" th:value="${e.getId()}"/></div>
+            </form>
+            <hr width="100%"/>
+        </div>
+    </div>
+    <div style="width:100%; display: flex;justify-content: center;margin-top: 20px">
+        <div style="font-size:20px;font-weight: bold;"> 3.</div>
+        <div style="width: 100%; ">
+            <div style="font-size:20px;font-weight: bold ">其他软件</div>
+            <div style="font-size:20px ;margin-top: 10px">若你使用的软件未在上述列表中，请手动填写此项。</div>
+            <textarea style="font-size:20px;  margin-top: 10px" id="input-other" rows="4" cols="50">
+
+</textarea>
+            <hr width="100%"/>
+        </div>
+    </div>
+    <div style="width:100%; display: flex;justify-content: center;margin-bottom: 50px">
+        <button style="width: 200px" class="btn btn-primary" id="submit">提交</button>
+    </div>
+</div>
+</body>
+<script type="text/javascript" th:inline="javascript">
+    //设置跨域请求
+    function isEmpty(str) {
+        if (str != null && str.length > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    $(document).ready(function () {
+        $("#submit").click(function () {
+            // alert([[${mOaUser.getName()}]])
+            if (isEmpty($("#input-name").val())) {
+                alert("请输入姓名");
+                return
+            }
+            if (isEmpty($("#input-gh").val())) {
+                alert("请输入工号");
+                return
+            }
+            if (isEmpty($("#input-bm").val())) {
+                alert("请输入部门");
+                return
+            }
+
+            var obj = $('[name="checks"]');
+            var ids = "";
+            for (k in obj) {
+                if (obj[k].checked)
+                    ids += obj[k].value + ",";
+            }
+            if (isEmpty(ids)) {
+                alert("请选择常用办公软件");
+                return
+            } else {
+                ids = ids.substr(0, ids.length - 1);
+            }
+            $.ajax({
+                url: "http://127.0.0.1:8080/oaUser/insert",
+                dataType: "json",
+                method: "post",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    "name": $("#input-name").val(),
+                    "jobNumber": $("#input-gh").val(),
+                    "department": $("#input-bm").val(),
+                    "oaIds": ids,
+                    "otherOa": $("#input-other").val(),
+
+                }),
+                //在请求显示提示框
+                beforeSend: function (jqXHR, settings) {
+                    this.layerIndex = layer.load(1);
+                },
+                success: function (result) {
+                    console.log(result);
+                    alert("提交成功");
+                    layer.close(this.layerIndex);
+                },
+                error: function (err) {
+                    console.log(err);
+                    layer.alert('数据请求失败，请后再试!');
+                    $(".loading").addClass("loading-hide");
+                    $(".json-renderer").trigger("GetDataFailed");
+                }
+            });
+
+        });
+    });
+</script>
+</html>
