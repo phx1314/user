@@ -15,4 +15,5 @@ public interface OaUserMapper extends Mapper<OaUser> {
   OaUser selectByJobNumber(String jobNumber);
 
   List<OaUser> selectByOaIds(String oaIds);
+  List<OaUser> selectLisByIds(@Param("lists")List<String> lists);
 }

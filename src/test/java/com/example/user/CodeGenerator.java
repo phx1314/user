@@ -46,7 +46,7 @@ public class CodeGenerator {
      * @param args
      */
     public static void main(String[] args) {
-        genCode("oa_user");
+        genCode("oa_relation");
     }
 
     /**

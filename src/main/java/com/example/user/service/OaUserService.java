@@ -15,4 +15,6 @@ public interface OaUserService extends Service<OaUser> {
   OaUser selectByJobNumber(String jobNumber);
 
   List<OaUser> selectByOaIds(String oaIds);
+
+  List<OaUser> selectLisByIds(List<String> ids);
 }

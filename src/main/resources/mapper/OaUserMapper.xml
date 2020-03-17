@@ -19,4 +19,10 @@
     <select id="selectByOaIds" resultType="com.example.user.model.OaUser">
 		select * from oa_user where FIND_IN_SET(#{oaIds} ,oa_ids)
 	</select>
+    <select id="selectLisByIds" resultType="com.example.user.model.OaUser">
+        select * from oa_user where id in
+        <foreach item="item" index="index" collection="lists" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
 </mapper>

@@ -1,15 +1,19 @@
 package com.example.user.controller;
 
-import com.example.user.core.ret.RetResult;
 import com.example.user.core.ret.RetResponse;
+import com.example.user.core.ret.RetResult;
 import com.example.user.core.utils.ApplicationUtils;
+import com.example.user.model.OaRelation;
 import com.example.user.model.OaUser;
+import com.example.user.service.OaRelationService;
 import com.example.user.service.OaUserService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,18 +27,29 @@ public class OaUserController {
 
   @Resource
   private OaUserService oaUserService;
+  @Resource
+  private OaRelationService oaRelationService;
 
   @PostMapping("/insert")
   public RetResult<Integer> insert(@RequestBody OaUser oaUser) throws Exception {
     OaUser oaUser_query = oaUserService.selectBy("jobNumber", oaUser.getJobNumber());
 //    OaUser oaUser_query2 = oaUserService.selectByJobNumber( oaUser.getJobNumber());
+//    oaUserService.selectListByIds()
+    String[] oaIds = oaUser.getOaIds().split(",");
     if (oaUser_query != null) {
       oaUser.setId(oaUser_query.getId());
       Integer state = oaUserService.update(oaUser);
+      oaRelationService.deleteByUid(oaUser.getId());
+      for (String id : oaIds) {
+        Integer i = oaRelationService.insert(new OaRelation(ApplicationUtils.getUUID(), oaUser.getId(), id));
+      }
       return RetResponse.makeOKRsp(state);
     } else {
       oaUser.setId(ApplicationUtils.getUUID());
       Integer state = oaUserService.insert(oaUser);
+      for (String id : oaIds) {
+        Integer i = oaRelationService.insert(new OaRelation(ApplicationUtils.getUUID(), oaUser.getId(), id));
+      }
       return RetResponse.makeOKRsp(state);
     }
   }
@@ -84,6 +99,34 @@ public class OaUserController {
     PageHelper.startPage(page, size);
     List<OaUser> list = oaUserService.selectByOaIds(oaIds);
     PageInfo<OaUser> pageInfo = new PageInfo<OaUser>(list);
+    return RetResponse.makeOKRsp(pageInfo);
+  }
+
+  /**
+   * @param page 页码
+   * @param size 每页条数
+   * @Description: 分页查询
+   * @Reutrn RetResult<PageInfo < OaUser>>
+   */
+  @PostMapping("/selectByOaId")
+  public RetResult<PageInfo<OaUser>> selectByOaId(@RequestParam(defaultValue = "1") Integer page,
+                                                  @RequestParam(defaultValue = "5") Integer size, @RequestParam String oaId) throws Exception {
+    PageHelper.startPage(page, size);
+    List<OaRelation> list = oaRelationService.selectListBySid(oaId);
+    String uis = "";
+
+    List<String> ids = new ArrayList<>();
+    for (OaRelation item : list) {
+      uis += item.getUid() + ",";
+      ids.add(item.getUid());
+    }
+    List<OaUser> data = new ArrayList<>();
+    if (!StringUtils.isEmpty(uis)) {
+      uis = uis.substring(0, uis.length() - 1);
+//      data = oaUserService.selectListByIds(uis);
+      data = oaUserService.selectLisByIds(ids);
+    }
+    PageInfo<OaUser> pageInfo = new PageInfo<OaUser>(data);
     return RetResponse.makeOKRsp(pageInfo);
   }
 }

@@ -30,4 +30,9 @@ public class OaUserServiceImpl extends AbstractService<OaUser> implements OaUser
   public List<OaUser> selectByOaIds(String oaIds) {
     return oaUserMapper.selectByOaIds(oaIds);
   }
+
+  @Override
+  public List<OaUser> selectLisByIds(List<String> ids) {
+    return oaUserMapper.selectLisByIds(ids);
+  }
 }
